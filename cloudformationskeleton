@@ -1,0 +1,10 @@
+{
+	"AWSTemplateFormatVersion" : ""2010-09-09"",
+	"Description" : "creating a vpc-reference logical id and name of the vpc is my-vpc",
+	 "Resources" : {
+		 "vpc-reference":{
+			 "logical-id":{
+			 }
+		 }
+	 }
+}
