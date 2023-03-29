@@ -7,14 +7,24 @@
             "Default": "192.168.0.0/16",
             "Description": "Vpc CidrBlock"
         },
+        "portno" : {
+            "Type" : "String",
+            "Default" : "3306",
+            "Description" : "rds port no"
+
+        },
+        "engine" : {
+            "Type" : "String",
+            "Default" : "mysql",
+            "Description": "rds engine",
+            "AllowedValues": [
+                "mysql",
+                "postgres"
+            ]
+        },
         "web1cidr": {
             "Description": "web1 subnet cidr",
             "Type": "String",
-            "AllowedValues": [
-                "192.168.0.0/24",
-                "192.168.1.0/24",
-                "192.168.3.0/24"
-            ],
             "Default": "192.168.0.0/24"
         },
         "web2cidr": {
@@ -33,7 +43,11 @@
             "Default": "192.168.3.0/24"
         },
         "az1": {
-            "Description": "availability zone to be specified",
+            "Description": "This is az1",
+            "Type": "AWS::EC2::AvailabilityZone::Name"
+        },
+        "az2": {
+            "Description": "This is az2",
             "Type": "AWS::EC2::AvailabilityZone::Name"
         }
     },
@@ -67,11 +81,11 @@
                 "VpcId": {
                     "Ref": "ntiervpc"
                 },
-                "CidrBlock": {
-                    "Ref": "web1cidr"
-                },
                 "AvailabilityZone": {
                     "Ref": "az1"
+                },
+                "CidrBlock": {
+                    "Ref": "web1cidr"
                 },
                 "Tags": [
                     {
@@ -94,6 +108,9 @@
             "Properties": {
                 "VpcId": {
                     "Ref": "ntiervpc"
+                },
+                "AvailabilityZone": {
+                    "Ref": "az2"
                 },
                 "CidrBlock": {
                     "Ref": "web2cidr"
@@ -120,6 +137,9 @@
                 "VpcId": {
                     "Ref": "ntiervpc"
                 },
+                "AvailabilityZone": {
+                    "Ref": "az1"
+                },
                 "CidrBlock": {
                     "Ref": "db1cidr"
                 },
@@ -145,6 +165,9 @@
                 "VpcId": {
                     "Ref": "ntiervpc"
                 },
+                "AvailabilityZone": {
+                    "Ref": "az2"
+                },
                 "CidrBlock": {
                     "Ref": "db2cidr"
                 },
@@ -160,6 +183,101 @@
                     {
                         "Key": "CreatedBy",
                         "Value": "Cloudformation"
+                    }
+                ]
+            }
+        },
+        "rdsDBSubnetGroup": {
+            "Type": "AWS::RDS::DBSubnetGroup",
+            "Properties": {
+                "DBSubnetGroupDescription": "ntierdbsubnetgroup",
+                "DBSubnetGroupName": "ntierdbsubnetgroup",
+                "SubnetIds": [
+                    {
+                        "Ref": "db1subnet"
+                    },
+                    {
+                        "Ref": "db2subnet"
+                    }
+                ],
+                "Tags": [
+                    {
+                        "Key": "Env",
+                        "Value": "Dev"
+                    },
+                    {
+                        "Key": "CreatedBy",
+                        "Value": "Cloudformation"
+                    }
+                ]
+            }
+        },
+        "ntierdbsg": {
+            "Type": "AWS::EC2::SecurityGroup",
+            "Properties": {
+                "GroupDescription": "ntierdb security group",
+                "SecurityGroupIngress": [
+                    {
+                        "CidrIp": {
+                            "Ref": "vpccidr"
+                        },
+                        "Description": "Allow all incoming connections on 3306",
+                        "IpProtocol": "tcp",
+                        "FromPort": 3306,
+                        "ToPort": 3306
+                    }
+                ],
+                "VpcId": {
+                    "Ref": "ntiervpc"
+                },
+                "Tags": [
+                    {
+                        "Key": "Env",
+                        "Value": "Dev"
+                    },
+                    {
+                        "Key": "CreatedBy",
+                        "Value": "Cloudformation"
+                    }
+                ]
+            }
+        },
+        "ntierdb": {
+            "Type": "AWS::RDS::DBInstance",
+            "Properties": {
+                "AllocatedStorage": 20,
+                "DBInstanceClass": "db.t3.micro",
+                "AllowMajorVersionUpgrade": false,
+                "AutoMinorVersionUpgrade": false,
+                "BackupRetentionPeriod": 0,
+                "DBInstanceIdentifier": "qtrdsdbinstancefromcf",
+                "DBName": "employees",
+                "DBSubnetGroupName": {
+                    "Ref": "rdsDBSubnetGroup"
+                },
+                "Engine": 
+                { "Ref": "engine" }
+                ,
+                "EngineVersion": "8.0.32",
+                "MasterUsername": "admin",
+                "MasterUserPassword": "adminadmin",
+                "MultiAZ": false,
+                "Port": { "Ref": "portno" },
+                "PubliclyAccessible": false,
+                "StorageType": "gp2",
+                "Tags": [
+                    {
+                        "Key": "Env",
+                        "Value": "Dev"
+                    },
+                    {
+                        "Key": "CreatedBy",
+                        "Value": "Cloudformation"
+                    }
+                ],
+                "VPCSecurityGroups": [
+                    {
+                        "Ref": "ntierdbsg"
                     }
                 ]
             }
