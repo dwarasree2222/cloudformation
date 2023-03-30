@@ -1,0 +1,35 @@
+{
+    "AWSTemplateFormatVersion": "2010-09-09",
+    "Description": "creating a IAM and group user",
+    "Parameters": {
+        "cidrblock": {
+            "Type": "String",
+            "Default": "192.168.0.0/16",
+            "AllowedValues": [
+                "192.168.0.0/16"
+            ],
+            "Description": "the default cidr_block is defined"
+        }
+    },
+    "Resources": {
+        "myvpc": {
+            "Type": "AWS::EC2::VPC",
+            "Properties": {
+                "CidrBlock": {
+                    "Ref": "cidrblock"
+                },
+                "EnableDnsHostnames": false,
+                "Tags": [
+                    {
+                        "Key": "Name",
+                        "Value": "vpc"
+                    },
+                    {
+                        "Key": "createdby",
+                        "Value": "cloudformation"
+                    }
+                ]
+            }
+        }
+    }
+}

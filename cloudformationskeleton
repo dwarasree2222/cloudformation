@@ -1,6 +1,12 @@
 {
 	"AWSTemplateFormatVersion" : ""2010-09-09"",
 	"Description" : "creating a IAM and group user",
+	"parameters" : {
+		"logical-id": {
+
+		}
+
+	},
 	 "Resources" : {
 		 "logical-id":{
 		 }
